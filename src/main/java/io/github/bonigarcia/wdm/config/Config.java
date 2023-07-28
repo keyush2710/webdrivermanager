@@ -79,7 +79,7 @@ public class Config {
             Boolean.class);
     ConfigKey<Boolean> avoidResolutionCache = new ConfigKey<>(
             "wdm.avoidResolutionCache", Boolean.class);
-    ConfigKey<Boolean> avoidReadReleaseFromRepository = new ConfigKey<>(
+    ConfigKey<Boolean> avoidReadRelFromRepo = new ConfigKey<>(
             "wdm.avoidReadReleaseFromRepository", Boolean.class);
     ConfigKey<Boolean> avoidTmpFolder = new ConfigKey<>("wdm.avoidTmpFolder",
             Boolean.class);
@@ -527,11 +527,11 @@ public class Config {
     }
 
     public boolean isAvoidReadReleaseFromRepository() {
-        return resolve(avoidReadReleaseFromRepository);
+        return resolve(avoidReadRelFromRepo);
     }
 
     public Config setAvoidReadReleaseFromRepository(boolean value) {
-        this.avoidReadReleaseFromRepository.setValue(value);
+        this.avoidReadRelFromRepo.setValue(value);
         return this;
     }
 
@@ -1439,5 +1439,21 @@ public class Config {
 
     public boolean getEnableTracing() {
         return resolve(tracing);
+    }
+    public String returnDockerImageFormat(String browserVersion,
+                                       boolean androidEnabled) {
+        String dockerImageFormat;
+        if (isBrowserVersionBetaOrDev(browserVersion)) {
+            dockerImageFormat = getDockerBrowserTwilioImageFormat();
+        } else if (androidEnabled) {
+            dockerImageFormat = getDockerBrowserMobileImageFormat();
+        } else {
+            dockerImageFormat = getDockerBrowserSelenoidImageFormat();
+        }
+        return dockerImageFormat;
+    }
+    public boolean isBrowserVersionBetaOrDev(String browserVersion) {
+        return browserVersion.equalsIgnoreCase("beta")
+                || browserVersion.equalsIgnoreCase("dev");
     }
 }

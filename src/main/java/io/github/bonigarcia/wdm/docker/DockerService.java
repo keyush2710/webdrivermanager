@@ -394,34 +394,44 @@ public class DockerService {
         dockerClient = getDockerClient(dockerHost);
     }
 
-    public String getImageVersionFromDockerHub(
-            DriverManagerType driverManagerType, String cacheKey,
-            String browserName, String browserVersion, boolean androidEnabled) {
+    public String getImageVersionFromDockerHub(DockerImageParameters imageParameters) {
         String latestVersion = null;
 
-        if (!resolutionCache.checkKeyInResolutionCache(cacheKey, false)) {
-            VersionComparator versionComparator = new VersionComparator();
-            List<String> browserList = null;
-            DockerHubService dockerHubService = new DockerHubService(config,
-                    httpClient);
-            List<DockerHubTag> dockerHubTags;
-            String tagPreffix = browserName + SEPARATOR;
-            int minusIndex = getMinusIndex(browserVersion);
+        if (!resolutionCache.checkKeyInResolutionCache(imageParameters.getCacheKey(), false)) {
+            latestVersion=toGetLatestVersion(imageParameters);
+        } else {
+            latestVersion = resolutionCache
+                    .getValueFromResolutionCache(imageParameters.getCacheKey());
+        }
 
-            String dockerBrowserImageFormat = config
-                    .getDockerBrowserSelenoidImageFormat();
-            switch (driverManagerType) {
+        return latestVersion;
+    }
+
+    public String toGetLatestVersion(DockerImageParameters imageParameters)
+    {
+        String latestVersion = null;
+        VersionComparator versionComparator = new VersionComparator();
+        List<String> browserList = null;
+        DockerHubService dockerHubService = new DockerHubService(config,
+                httpClient);
+        List<DockerHubTag> dockerHubTags;
+        String tagPreffix = imageParameters.getBrowserName() + SEPARATOR;
+        int minusIndex = getMinusIndex(imageParameters.getBrowserVersion());
+
+        String dockerBrowserImageFormat = config
+                .getDockerBrowserSelenoidImageFormat();
+        switch (imageParameters.getDriverManagerType()) {
             case CHROME:
             case FIREFOX:
-                if (androidEnabled) {
+                if (imageParameters.isAndroidEnabled()) {
                     dockerBrowserImageFormat = String.format(
                             config.getDockerBrowserMobileImageFormat(),
-                            browserName, "");
+                            imageParameters.getBrowserName(), "");
                 }
                 dockerHubTags = dockerHubService
                         .listTags(dockerBrowserImageFormat);
 
-                if (androidEnabled) {
+                if (imageParameters.isAndroidEnabled()) {
                     browserList = dockerHubTags.stream()
                             .map(DockerHubTag::getName)
                             .sorted(versionComparator::compare)
@@ -453,7 +463,7 @@ public class DockerService {
             case SAFARI:
                 String dockerBrowserAerokubeImageFormat = String.format(
                         config.getDockerBrowserAerokubeImageFormat(),
-                        browserName, "");
+                        imageParameters.getBrowserName(), "");
                 dockerHubTags = dockerHubService
                         .listTags(dockerBrowserAerokubeImageFormat);
                 browserList = dockerHubTags.stream().map(DockerHubTag::getName)
@@ -464,26 +474,19 @@ public class DockerService {
 
             default:
                 throw new WebDriverManagerException(
-                        driverManagerType.getBrowserName()
+                        imageParameters.getDriverManagerType().getBrowserName()
                                 + " is not available as Docker container");
-            }
-            if (minusIndex == 0) {
-                log.debug("The latest version of {} in Docker Hub is {}",
-                        driverManagerType.getBrowserName(), latestVersion);
-            } else {
-                log.debug("The version-{} of {} in Docker Hub is {}",
-                        minusIndex, driverManagerType.getBrowserName(),
-                        latestVersion);
-            }
-
-        } else {
-            latestVersion = resolutionCache
-                    .getValueFromResolutionCache(cacheKey);
         }
-
+        if (minusIndex == 0) {
+            log.debug("The latest version of {} in Docker Hub is {}",
+                    imageParameters.getDriverManagerType().getBrowserName(), latestVersion);
+        } else {
+            log.debug("The version-{} of {} in Docker Hub is {}",
+                    minusIndex, imageParameters.getDriverManagerType().getBrowserName(),
+                    latestVersion);
+        }
         return latestVersion;
     }
-
     public int getMinusIndex(String browserVersion) {
         int minusIndex = 0;
         if (isBrowserVersionLatestMinus(browserVersion)) {
@@ -520,26 +523,19 @@ public class DockerService {
 
     public String getDockerImageFormat(String browserVersion,
             boolean androidEnabled) {
-        String dockerImageFormat;
-        if (isBrowserVersionBetaOrDev(browserVersion)) {
-            dockerImageFormat = config.getDockerBrowserTwilioImageFormat();
-        } else if (androidEnabled) {
-            dockerImageFormat = config.getDockerBrowserMobileImageFormat();
-        } else {
-            dockerImageFormat = config.getDockerBrowserSelenoidImageFormat();
-        }
+        String dockerImageFormat=config.returnDockerImageFormat(browserVersion,androidEnabled);
         return dockerImageFormat;
     }
 
     public boolean isBrowserVersionWildCard(String browserVersion) {
-        return isBrowserVersionBetaOrDev(browserVersion)
+        return config.isBrowserVersionBetaOrDev(browserVersion)
                 || isBrowserVersionLatestMinus(browserVersion);
     }
 
-    public boolean isBrowserVersionBetaOrDev(String browserVersion) {
-        return browserVersion.equalsIgnoreCase(BETA)
-                || browserVersion.equalsIgnoreCase(DEV);
-    }
+//    public boolean isBrowserVersionBetaOrDev(String browserVersion) {
+//        return browserVersion.equalsIgnoreCase(BETA)
+//                || browserVersion.equalsIgnoreCase(DEV);
+//    }
 
     public boolean isBrowserVersionLatestMinus(String browserVersion) {
         return browserVersion.toLowerCase(ROOT).contains(LATEST_MINUS);

@@ -1,11 +1,5 @@
 # Changelog
 
-## [5.4.1] - 2023-07-19
-
-### Fixed
-- Use last good versions CfT endpoint only when driver version is unknown (#1076)
-
-
 ## [5.4.0] - 2023-06-21
 
 ### Changed

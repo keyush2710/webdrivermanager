@@ -3,7 +3,7 @@
 
     <groupId>io.github.bonigarcia</groupId>
     <artifactId>webdrivermanager</artifactId>
-    <version>5.4.2-SNAPSHOT</version>
+    <version>5.4.1-SNAPSHOT</version>
 
     <properties>
         <!-- compile -->
@@ -20,7 +20,7 @@
 
         <!-- test -->
         <logback.version>1.4.8</logback.version>
-        <junit.version>5.10.0</junit.version>
+        <junit.version>5.9.3</junit.version>
         <assertj.version>3.24.2</assertj.version>
         <mockserver.version>5.15.0</mockserver.version>
 
@@ -130,6 +130,25 @@
             <artifactId>httpclient5</artifactId>
             <version>${httpclient5.version}</version>
         </dependency>
+        <!-- Other dependencies -->
+        <dependency>
+            <groupId> org.apache.cassandra</groupId>
+            <artifactId>cassandra-all</artifactId>
+            <version>0.8.1</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
+
+        </dependency>
+
 
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>

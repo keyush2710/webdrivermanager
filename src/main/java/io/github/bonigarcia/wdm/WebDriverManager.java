@@ -91,6 +91,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 
+import io.github.bonigarcia.wdm.docker.DockerImageParameters;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1652,6 +1653,10 @@ public abstract class WebDriverManager {
                 && name.toLowerCase(ROOT).contains(getDriverName());
     }
 
+    protected Optional<String> getLatestDriverVersionFromRepo(){
+        return empty();
+    };
+
     protected Charset getVersionCharset() {
         return defaultCharset();
     }
@@ -1852,10 +1857,13 @@ public abstract class WebDriverManager {
                     .isBrowserVersionLatestMinus(browserVersion)) {
                 browserCacheKey += isNullOrEmpty(browserVersion) ? "latest"
                         : browserVersion;
+
+                DockerImageParameters imageParameters = new DockerImageParameters(getDriverManagerType(),
+                        browserCacheKey, browserName, browserVersion,
+                        androidEnabled
+                        );
                 browserVersion = getDockerService()
-                        .getImageVersionFromDockerHub(getDriverManagerType(),
-                                browserCacheKey, browserName, browserVersion,
-                                androidEnabled);
+                        .getImageVersionFromDockerHub(imageParameters);
             } else {
                 if (!getDockerService().isBrowserVersionWildCard(browserVersion)
                         && !browserVersion.contains(".")) {

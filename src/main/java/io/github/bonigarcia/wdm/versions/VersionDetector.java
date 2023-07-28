@@ -132,7 +132,7 @@ public class VersionDetector {
 
                     return Optional.of(fileteredList
                             .get(fileteredList.size() - 1).version);
-                } else if (!driverVersion.isPresent()) {
+                } else {
                     // Parse JSON using LastGoodVersions
                     cftUrl = config.getChromeLastGoodVersionsUrl();
 

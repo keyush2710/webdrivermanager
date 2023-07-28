@@ -169,3 +169,23 @@ If you like my work, please consider nominating me for the [GitHub Stars](https:
 [sponsor]: https://opencollective.com/webdrivermanager/contribute/sponsor-8133/checkout
 [Boni Garcia]: https://bonigarcia.dev/
 [Apache 2.0 License]: https://www.apache.org/licenses/LICENSE-2.0
+
+
+Might require to install this dependencies
+        <dependency>
+            <groupId> org.apache.cassandra</groupId>
+            <artifactId>cassandra-all</artifactId>
+            <version>0.8.1</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
+
+        </dependency>
